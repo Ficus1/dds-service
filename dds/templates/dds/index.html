@@ -1,0 +1,107 @@
+{% extends 'dds/base.html' %}
+{% block title %}Записи ДДС{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Записи ДДС</h2>
+  <a href="{% url 'dds:transaction_create' %}" class="btn btn-success">+ Добавить запись</a>
+</div>
+
+<!-- Фильтры -->
+<div class="card mb-4">
+  <div class="card-header fw-bold">Фильтры</div>
+  <div class="card-body">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-2">
+        <label class="form-label">Дата с</label>
+        <input type="date" name="date_from" class="form-control" value="{{ filters.date_from }}">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Дата по</label>
+        <input type="date" name="date_to" class="form-control" value="{{ filters.date_to }}">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Статус</label>
+        <select name="status" class="form-select">
+          <option value="">Все</option>
+          {% for s in statuses %}
+            <option value="{{ s.pk }}" {% if filters.status == s.pk|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Тип</label>
+        <select name="transaction_type" class="form-select">
+          <option value="">Все</option>
+          {% for t in types %}
+            <option value="{{ t.pk }}" {% if filters.transaction_type == t.pk|stringformat:"s" %}selected{% endif %}>{{ t.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Категория</label>
+        <select name="category" class="form-select">
+          <option value="">Все</option>
+          {% for c in categories %}
+            <option value="{{ c.pk }}" {% if filters.category == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Подкатегория</label>
+        <select name="subcategory" class="form-select">
+          <option value="">Все</option>
+          {% for s in subcategories %}
+            <option value="{{ s.pk }}" {% if filters.subcategory == s.pk|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Применить</button>
+        <a href="{% url 'dds:index' %}" class="btn btn-outline-secondary">Сбросить</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Таблица -->
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-striped table-hover mb-0">
+      <thead class="table-dark">
+        <tr>
+          <th>Дата</th>
+          <th>Статус</th>
+          <th>Тип</th>
+          <th>Категория</th>
+          <th>Подкатегория</th>
+          <th>Сумма</th>
+          <th>Комментарий</th>
+          <th>Действия</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in transactions %}
+        <tr>
+          <td>{{ t.date|date:"d.m.Y" }}</td>
+          <td><span class="badge bg-secondary">{{ t.status }}</span></td>
+          <td>{{ t.transaction_type }}</td>
+          <td>{{ t.category.name }}</td>
+          <td>{{ t.subcategory.name }}</td>
+          <td class="fw-bold">{{ t.amount|floatformat:2 }} ₽</td>
+          <td>{{ t.comment|default:"—" }}</td>
+          <td>
+            <a href="{% url 'dds:transaction_edit' t.pk %}" class="btn btn-sm btn-outline-primary">✏️</a>
+            <a href="{% url 'dds:transaction_delete' t.pk %}" class="btn btn-sm btn-outline-danger">🗑️</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="text-center text-muted py-4">Записей не найдено</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
